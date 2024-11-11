@@ -1,14 +1,7 @@
-
-
-/*
-This is a UI file (.ui.qml) that is intended to be edited in Qt Design Studio only.
-It is supposed to be strictly declarative and only uses a subset of QML. If you edit
-this file manually, you might introduce QML code that is not supported by Qt Design Studio.
-Check out https://doc.qt.io/qtcreator/creator-quick-ui-forms.html for details on .ui.qml files.
-*/
 import QtQuick
 import QtQuick.Controls
 import UntitledProject1
+import QtQuick.Studio.DesignEffects
 
 Rectangle {
     id: rectangle
@@ -52,29 +45,45 @@ Rectangle {
         anchors.rightMargin: 8
         anchors.topMargin: 80
         anchors.bottomMargin: 50
+        spacing: 8
 
 
         Repeater {
             id: repeater
             anchors.fill: parent
+            model: ListModel{
+                id: myListModel
+
+                ListElement{
+                    name:"Prueba"
+                }
+
+                function createListElement(){
+                    return {
+                        "name": textField.text,
+                    }
+                }
+                function destroyListElement(nombre){
+                    for (let i = 0; i < myListModel.count; i++) {
+                        if (myListModel.get(i).name === itemName) {
+                            myListModel.remove(i);  // Remove the item at index i
+                            break;  // Exit the loop once the item is found
+                        }
+                    }
+                }
+            }
 
             Rectangle {
                 id: todo_item
-                x: 8
-                y: 85
-                height: 45
+                height: 44
+                visible: true
+                width: parent.width
                 color: "#779dc5"
                 radius: 5
                 border.color: "#ffffff"
                 border.width: 2
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                anchors.topMargin: 85
                 CheckBox {
-                    id: checkBox
+                    id: pendiente_check
                     text: qsTr("")
                     anchors.right: parent.right
                     anchors.top: parent.top
@@ -86,6 +95,44 @@ Rectangle {
                     display: AbstractButton.IconOnly
                     checkable: true
                     checkState: Qt.Unchecked
+                }
+
+                Text {
+                    id: pendiente_texto
+                    text: name
+                    anchors.left: parent.left
+                    anchors.fill: parent
+                    anchors.leftMargin: 33
+                    font.pixelSize: 12
+                    verticalAlignment: Text.AlignVCenter
+                    font.weight: Font.DemiBold
+                }
+
+                Button {
+                    id: button
+                    x: 8
+                    y: 12
+                    width: 20
+                    height: 20
+                    text: "X"
+                    font.weight: Font.Bold
+                    font.bold: true
+                    display: AbstractButton.TextOnly
+                    background: Rectangle{
+                        color:"red"
+                    }
+                    contentItem: Text{
+                        text: "X"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.weight: Font.Bold
+                        color: "white"
+                    }
+
+                    Connections {
+                        target: button
+                        onClicked: console.log(pendiente_texto.text);
+                    }
                 }
             }
         }
@@ -133,13 +180,18 @@ Rectangle {
         font.pointSize: 18
         display: AbstractButton.TextOnly
         highlighted: false
+
+        Connections {
+            target: new_btn
+            onClicked: if (textField.text !== "") {
+                           myListModel.append(myListModel.createListElement())
+                           textField.text = ""
+                       } else {
+                           console.log("Nuevo Pendiente Vacío")
+                       }
+        }
     }
 
-
-    Connections {
-        target: rectangle
-        onActiveFocusChanged: console.log("clicked")
-    }
 
 
 }
